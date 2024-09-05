@@ -23,7 +23,7 @@ def checkLogin():
 				os.system("cls")
 				print()
 				prGreen("Login Successful!") # Print this statement in green
-				prPurple(f"Role: {currentRole}")
+				prLightPurple(f"Role: {currentRole}")
 				print(f" Hi {nickname}!")
 				break  # This will break the loop at any times if ever the password is correct, this will prevent the loop from running again if the password was found and the user had some attempts left
 
