@@ -1,9 +1,9 @@
 from datasetManipulation import readCredentials, appendCredentials, writeCredentials
 import os 
 from styles import *
-import re
  
 # for validating an Email
+import re
 def verifyEmail(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if re.match(pattern, email):
@@ -44,6 +44,10 @@ def adminFunctions(adminEmail):
 
 				for email in info:
 
+					# Managers and chefs both have the same type of metadata
+					# However customers don't which means managers/chefs have to be processed differently from customers
+
+					# Checking if the roles are chef and manager 
 					if info[email]["Role"] in ["Chef", "Manager"]:
 
 						print()
@@ -69,9 +73,9 @@ def adminFunctions(adminEmail):
 						else:
 							prGreen("On Duty")
 
+					# Checking if the role is customer
 					elif info[email]["Role"] == "Customer":
 
-						# Customer Tim customer1@gmail.com pass 3 602858194727
 						print()
 
 						print("Nickname:", end=" ")
@@ -162,46 +166,47 @@ def adminFunctions(adminEmail):
 						index += 1
 
 				while True:
-					command = int(input("Enter the index of the staff's information you want to edit >> "))
-					if command not in indexingStaff:
+					staffEdit = int(input("Enter the index of the staff's information you want to edit >> "))
+					if staffEdit not in indexingStaff:
 						prRed("Please select a valid index!!")
-					elif command == 0:
+					elif staffEdit == 0:
 						prLightGrey("Cancelling operation!!")
 						break
 
 					else:
-						prGreen(f"Editing {info[indexingStaff[command]]["Nickname"]}'s information")
-						selectedEmail = indexingStaff[command]
+						prGreen(f"Editing {info[indexingStaff[staffEdit]]["Nickname"]}'s information")
+						selectedEmail = indexingStaff[staffEdit]
 						prGreen(selectedEmail)
 						break
 
 				while True:
 					print()
-					print("1. Nickname")
-					print("2. Email")
-					print("3. Role")
-					print("4. Salary")
-					print("0. Save & Exit")
+					print("\t1. Nickname")
+					print("\t2. Email")
+					print("\t3. Role")
+					print("\t4. Salary")
+					prRed("\t5. Delete current staff")
+					print("\t0. Save & Exit")
 					print()
 
-					command = int(input("Enter the index >> "))
+					editCommand = int(input("Enter the index >> "))
 
 					# Terminating the editing process 
-					if command == 0:
+					if editCommand == 0:
 						writeCredentials(info)
 						break
 
 					# Editing the nickname of the staff
-					elif command == 1:
+					elif editCommand == 1:
 						newName = input("Enter the new nickname: ")
 						while newName in ["", " "]:
 							print()
-							prRed("Please enter a proper nickname!!")
+							prGreen("Please enter a proper nickname!!")
 							newName = input("Enter the proper nickname: ")
 
 						info[selectedEmail]["Nickname"]	= newName
 
-					elif command == 2: 
+					elif editCommand == 2: 
 						newEmail = input("Enter the new email: ")
 						if verifyEmail(newEmail):
 							while True:
@@ -221,38 +226,58 @@ def adminFunctions(adminEmail):
 							prRed("Invalid email address!!")
 
 
-					elif command == 3:
+					# Changing the role of the staff
+					elif editCommand == 3:
 						prGreen("Select the new role!")
-						print("1. Admin")
-						print("2. Manager")
-						print("3. Chef")
+						print("\t1. Admin")
+						print("\t2. Manager")
+						print("\t3. Chef")
 						print()
 						valid = False
+
 						while not valid:
 							newRole = int(input("Enter the index >> "))
 							if newRole in [1, 2, 3]:
 								if newRole == 1:
-									# RECHECK THIS STATEMENT
-									info[selectedEmail]["Role"] = "Admin"
+									tempBuffer = info[selectedEmail]
+									info[selectedEmail] = {"Role": "Admin", "Nickname": tempBuffer["Nickname"], "Salary": tempBuffer["Salary"], "Contact Info": tempBuffer["Contact Info"], "Password": tempBuffer["Password"]}
+
 								elif newRole == 2:
 									info[selectedEmail]["Role"] = "Manger"
 								elif newRole == 3:
 									info[selectedEmail]["Role"] = "Chef"
 								else:
-									print("An error occured!!")
+									prRed("Please input a valid index!!")
 										
 								print(info)
 
 							valid = True
 
+					# Editing the salary
+					elif editCommand == 4:
+						while True:
+							try:
+								newSalary = int(input("Please enter the new salary: "))
+								break
+							except Exception as e:
+								prRed("Please enter a valid number!!")
+						info[selectedEmail]["Salary"] = newSalary
 
+
+					elif editCommand == 5:
+						confirmation = input("Are you sure you want to delete your account(Y/N): ").lower()
+						if confirmation == "y":
+							del info[selectedEmail]
+							prLightPurple(f"Deleting account with email: {adminEmail}")
+						else:
+							prRed("Cancelled operation!")
 
 			elif command == 4:
 				info = readCredentials()
 				while True:
 					emailDel = input("Enter the email address of the staff you want to delete (Type '0' to cancel'): ")
 					if emailDel in info or emailDel == '0':
-						print("Email found deleting entity!")
+						print("Email found, deleting entity!")
 						break
 					else:
 						prRed("This email is not found in the system!! Please try again.")
@@ -261,8 +286,11 @@ def adminFunctions(adminEmail):
 					prRed(f"Deleting data about {info[emailDel]["Nickname"]}")
 					del info[emailDel]
 
+				# Re-writing all the data with the updated value
 				writeCredentials(info)
 
+
+			# Yet to be implemented
 			elif command == 5:
 				pass
 
@@ -271,25 +299,28 @@ def adminFunctions(adminEmail):
 				info = readCredentials()
 				
 				print()
-				print("1. Nickname")
-				print("2. Email")
-				print("3. Password")
-				print("4. Salary")
-				print("0. Save & Exit")
+				prGreen("Editing own information")
+				print("\t1. Nickname")
+				print("\t2. Email")
+				print("\t3. Password")
+				print("\t4. Salary")
+
+				prRed("\t5. Delete own account")
+				print("\t0. Save & Exit")
 				print()
 
 				while True:
-					command = int(input("Enter the index of the command you want to execute >> "))
+					editCommand = int(input("Enter the index of the command you want to execute >> "))
 
-					if command == 0:
+					if editCommand == 0:
 						writeCredentials(info)
 						break
 					else:
-						if command == 1:
+						if editCommand == 1:
 							newNickname = input("Enter your new nickname: ")
 							info[adminEmail]["Nickname"] = newNickname
 
-						elif command == 2:
+						elif editCommand == 2:
 							newEmail = input("Enter your new email: ")
 							if verifyEmail(newEmail):
 								info[newEmail] = info[adminEmail]
@@ -299,17 +330,27 @@ def adminFunctions(adminEmail):
 								prRed("Invalid email address!!")
 
 
-						elif command == 3:
+						elif editCommand == 3:
 							newPassword = input("Enter your new password: ")
 							info[adminEmail]["Password"] = newPassword
 
-						elif command == 4:
+						elif editCommand == 4:
 							newSalary = input("Enter your new salary: ")
 							info[adminEmail]["Salary"] = newSalary
 
+						elif editCommand == 5:
+							confirmation = input("Are you sure you want to delete your account(Y/N): ").lower()
+							if confirmation == "y":
+								prLightPurple(f"Deleting account with email: {adminEmail}")
+								del info[adminEmail]
+								prRed("Loging out of the system!")
+								writeCredentials(info)
+								return
+							else:
+								prRed("Cancelling operation!")
+
 						else:
 							prRed("Invalid index!!")
-
 
 
 			elif command == 7:
@@ -318,12 +359,13 @@ def adminFunctions(adminEmail):
 
 			# Logout of the program
 			elif command == 0:
-				print("Loging out of the system!")
+				prRed("Loging out of the system!")
 				break
 
 			else:
 				prRed("This is an invalid command!")
 				print(featuresMessage)
+
 		except Exception as e:
 			print(e)
 
