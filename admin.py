@@ -55,7 +55,7 @@ def adminFunctions(adminEmail):
 						print("Nickname:", end=" ")
 						prGreen(f"{info[email]["Nickname"]}")
 
-						print("Role:", end="")
+						print("Role:", end=" ")
 						prPurple(info[email]["Role"])
 
 						print("Email:", end=" ")
