@@ -52,3 +52,21 @@ def writeCredentials(newData):
 
 		file.write(infoString)
 		prGreen("Data has successfully been modified!!")
+
+def readMenu():
+	with open("Dataset/menu.txt", "r") as file:
+		info = {}
+		buffer = file.read()
+		rawData = [i for i in buffer.split("\n") if i != ""]
+		for i in rawData:
+			data = i.split(", ")
+			dishType = data[0]
+			dishName = data[1]
+			dishPrice = data[2]
+			ingredients = data[3:]
+
+			info[dishName] = {"Type": dishType, "Price": dishPrice, "Ingredients": ingredients}
+
+	print(info)
+	return info
+
