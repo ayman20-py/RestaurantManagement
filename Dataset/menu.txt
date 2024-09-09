@@ -2,8 +2,8 @@ Curry, Butter Chicken, 12, Chicken, Heavy Cream, Curry powder, tomatoes, Chili
 Curry, Chicken Kofta, 13.10, Chicken, Spinach, Heavy Cream
 Curry, Chicken Achari, Chicken, Pickle, Spices
 
-Flat Breads, Cheese Naan, Flour, Cheese, Milk, Salt
-Flat Breads, Chapati, Flour, Olive Oil, Water, Salt
+Flat Breads, Cheese Naan, 2.5,  Flour, Cheese, Milk, Salt
+Flat Breads, Chapati, 3, Flour, Olive Oil, Water, Salt
 
 Rice, Plain Rice, 2.50
-Rice, Biryani Rice, Spices, 5
+Rice, Biryani Rice, 5.00
