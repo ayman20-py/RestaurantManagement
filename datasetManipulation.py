@@ -34,9 +34,12 @@ def appendCredentials(data):
 	with open("Dataset/credentials.txt", "a") as file:
 		file.write(str(data))
 
+# Writing functions will take in a dictionary itself and break it down before writing in the file
 def writeCredentials(newData):
 	with open("Dataset/credentials.txt", "w") as file:
 		infoList = []
+
+		# Break down every 
 		for email in newData:
 			data = newData[email]
 			if data["Role"] == "Admin":
@@ -47,7 +50,7 @@ def writeCredentials(newData):
 				buffer = f"{data["Role"]} {data["Nickname"]} {email} {data["Password"]} {data["NumberOfVisit"]} {data["Contact Info"]}"
 
 			infoList.append(buffer)
-
+ 
 		infoString = "\n".join(infoList)
 
 		file.write(infoString)
@@ -71,5 +74,22 @@ def readMenu():
 	return info
 
 def appendMenu(data):
-	with open("Dataset/menu.txt", "w") as file:
+	with open("Dataset/menu.txt", "a") as file:
 		file.write(str(data))
+
+# Writing functions will take in a dictionary itself and break it down before writing in the file
+def writeMenu(newData):
+	with open('Dataset/menu.txt', "w") as file:
+		infoList = []
+		for dish in newData:
+			data = newData[dish]
+			line = f"{data["Type"]}, {dish}, {data["Price"]}, {", ".join(data["Ingredients"])}"
+			infoList.append(line)
+			
+			print(line)
+		
+
+		file.write("\n".join(infoList))
+
+	prGreen("Data has successfully been modified!!")
+
