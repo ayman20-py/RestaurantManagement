@@ -237,17 +237,16 @@ def adminFunctions(adminEmail):
 
 						while not valid:
 							newRole = int(input("Enter the index >> "))
-							if newRole in [1, 2, 3]:
-								if newRole == 1:
-									tempBuffer = info[selectedEmail]
-									info[selectedEmail] = {"Role": "Admin", "Nickname": tempBuffer["Nickname"], "Salary": tempBuffer["Salary"], "Contact Info": tempBuffer["Contact Info"], "Password": tempBuffer["Password"]}
+							if newRole == 1:
+								tempBuffer = info[selectedEmail]
+								info[selectedEmail] = {"Role": "Admin", "Nickname": tempBuffer["Nickname"], "Salary": tempBuffer["Salary"], "Contact Info": tempBuffer["Contact Info"], "Password": tempBuffer["Password"]}
 
-								elif newRole == 2:
-									info[selectedEmail]["Role"] = "Manger"
-								elif newRole == 3:
-									info[selectedEmail]["Role"] = "Chef"
-								else:
-									prRed("Please input a valid index!!")
+							elif newRole == 2:
+								info[selectedEmail]["Role"] = "Manger"
+							elif newRole == 3:
+								info[selectedEmail]["Role"] = "Chef"
+							else:
+								prRed("Please input a valid index!!")
 										
 								print(info)
 
