@@ -170,7 +170,7 @@ def adminFunctions(adminEmail):
 					if staffEdit not in indexingStaff:
 						prRed("Please select a valid index!!")
 					elif staffEdit == 0:
-						prLightGrey("Cancelling operation!!")
+						prLightGray("Cancelling operation!!")
 						break
 
 					else:
