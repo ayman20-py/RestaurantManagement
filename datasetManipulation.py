@@ -70,3 +70,6 @@ def readMenu():
 	print(info)
 	return info
 
+def appendMenu(data):
+	with open("Dataset/menu.txt", "w") as file:
+		file.write(str(data))
