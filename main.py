@@ -21,5 +21,3 @@ if loginStatus["response"]:
 		print("Work in progress")
 else:
 	prRed("Error")
-
-# This is a test command
