@@ -1,7 +1,12 @@
+############################################################
+# When changing the role of someone, implement a cancel operation 
+############################################################
+
 from datasetManipulation import readCredentials, appendCredentials, writeCredentials
 import os 
 from styles import *
- 
+
+
 # for validating an Email
 import re
 def verifyEmail(email):
@@ -367,4 +372,5 @@ def adminFunctions(adminEmail):
 
 		except Exception as e:
 			print(e)
+
 
