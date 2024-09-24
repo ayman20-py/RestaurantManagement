@@ -70,7 +70,6 @@ def readMenu():
 
 			info[dishName] = {"Type": dishType, "Price": dishPrice, "Ingredients": ingredients}
 
-	print(info)
 	return info
 
 def appendMenu(data):
