@@ -1,4 +1,4 @@
-from datasetManipulation import readMenu, appendCredentials, writeCredentials, readCredentials, readOrders
+from datasetManipulation import *
 from styles import *
 import os
 
@@ -7,28 +7,6 @@ import os
 ###############################################
 orders = []
 
-
-def checkLogin():
-    credentials = readCredentials()
-    os.system("cls")
-
-    print("\nWelcome to the restaurant!!")
-    print("Please login to the system\n")
-
-    emailInput = input("Please enter your email: ")
-
-    if emailInput in credentials:
-        currentRole = credentials[emailInput]["Role"]
-        nickname = credentials[emailInput]["Nickname"]
-        os.system("cls")
-        print()
-        prGreen("Login Successful!")
-        prLightPurple(f"Role: {currentRole}")
-        print(f" Hi {nickname}!")
-        return {"email": emailInput, "response": True, "role": currentRole}
-    else:
-        print("Error, email not found")
-        return {"response": False}
 
 
 def applyDiscount(visits):
@@ -173,15 +151,16 @@ def orderFood(visits, customerEmail):
 def viewOrderStatus(customerEmail):
     customerOrders = readOrders()
     count = 1
-    for customers in customerOrders:
-        if customers == customerEmail:
+    for index in customerOrders:
+        if customerOrders[index]["Customer"] == customerEmail:
             print()
             print(f"Order {count}")
-            for dish in customerOrders[customers]["Dish"]:
+            for dish in customerOrders[index]["Dish"]:
                 print(f"\tDish Name: {dish["Dish Name"]}")
                 print(f"\tQuantity: {dish["Quantity"]}")
             print()
-            print(f"Status: {customerOrders[customers]["Status"]}")
+            print(f"Status: {customerOrders[index]["Status"]}")
+            count += 1
 
 
 
@@ -222,6 +201,103 @@ def updateProfile(customerEmail):
     prGreen("Profile updated successfully!")
 
 
+def editOrder(customerEmail):
+    orders = readOrders()
+    infoCred = readCredentials()
+
+    indexingOrders = {}
+
+    count = 1
+    for index in orders:
+        if customerEmail == orders[index]["Customer"] and orders[index]["Status"] == "Pending":
+            print()
+            print(f"INDEX: {count}")
+            print(f"STATUS: {orders[index]["Status"]}")
+            print("DISH: ")
+            for dish in orders[index]["Dish"]:
+                print(f"\t{dish["Dish Name"]}")
+                print(f"\tQuantity -> {dish["Quantity"]}")
+
+            indexingOrders[count] = index
+            count += 1
+
+
+    proceed = False
+    while True:
+        orderIndex = int(input("Enter the index of the order you want to edit: "))
+        if orderIndex in indexingOrders:
+            proceed = True
+            break
+        else:
+            print("Please enter a valid index!!")
+
+    cart = []
+    if proceed:
+        food_items = viewFoodMenu()
+        while True:
+            dish_name = input("Enter the food name to add to cart (Leave blank to end change) >> ")
+            if dish_name == "":
+                del orders[orderIndex]
+                writeOrders(orders)
+                orders[orderIndex] = {"Customer": customerEmail, "Status": "Pending", "Dish": ",".join(str(cart))}
+
+                with open("Dataset/orders.txt", "a") as file:
+                    file.write(f"{customerEmail},Pending,{','.join(cart)}")
+                
+                break
+            else:
+                if dish_name in food_items:
+                    try:
+                        quantity = int(input("Enter quantity >> "))
+                        if quantity > 0:
+                            price = float(food_items[dish_name]['Price'].replace(',', ''))  # Remove any commas
+                            # cart.append({"Dish Name": dish_name, "Quantity": quantity})
+                            cart.append(f"{dish_name}:{quantity}")
+                            print("Item added to cart!")
+                        else:
+                            print("Quantity must be greater than 0!")
+                    except ValueError:
+                        print("Invalid quantity! Please enter a number.")
+                else:
+                    print("Invalid food item!")
+
+                #file.write(f"{customerEmail},Pending,{",".join(cartName)}\n")
+
+
+def deleteOrder(customerEmail):
+    orders = readOrders()
+    infoCred = readCredentials()
+
+    indexingOrders = {}
+
+    count = 1
+    for index in orders:
+        if customerEmail == orders[index]["Customer"] and orders[index]["Status"] == "Pending":
+            print()
+            print(f"INDEX: {count}")
+            print(f"STATUS: {orders[index]["Status"]}")
+            print("DISH: ")
+            for dish in orders[index]["Dish"]:
+                print(f"\t{dish["Dish Name"]}")
+                print(f"\tQuantity -> {dish["Quantity"]}")
+
+            indexingOrders[count] = index
+            count += 1
+
+
+    proceed = False
+    while True:
+        orderIndex = int(input("Enter the index of the order you want to delete: "))
+        if orderIndex in indexingOrders:
+            proceed = True
+            break
+        else:
+            print("Please enter a valid index!!")
+
+    if proceed:
+        del orders[indexingOrders[orderIndex]]
+        writeOrders(orders)
+        print("Order deleted!!")
 
 def customerFunctions(customerEmail):
     """Main function for handling customer actions."""
@@ -232,8 +308,10 @@ def customerFunctions(customerEmail):
         print("\nCustomer Functions:")
         print("1. View & Order Food")
         print("2. View Order Status")
-        print("3. Send Feedback")
-        print("4. Update Profile")
+        print("3. Edit Order")
+        print("4. Delete Order")
+        print("5. Send Feedback")
+        print("6. Update Profile")
         print("0. Logout")
 
 
@@ -248,10 +326,16 @@ def customerFunctions(customerEmail):
         elif command == '2':
             viewOrderStatus(customerEmail)
 
-        elif command == '3':
+        elif command == "3":
+            editOrder(customerEmail)
+
+        elif command == "4":
+            deleteOrder(customerEmail)
+
+        elif command == '5':
             sendFeedback(customerEmail)
 
-        elif command == '4':
+        elif command == '6':
             updateProfile(customerEmail)
 
         elif command == '0':
