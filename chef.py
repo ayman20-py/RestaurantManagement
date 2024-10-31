@@ -41,11 +41,11 @@ def view_orders():
     orders = readOrders()
     print("\n*** Customer Orders ***")
     if orders:
-        for email in orders:
-            if orders[email]["Status"] == "Pending":
-                print(email)
-                print(f"Status: {orders[email]["Status"]}")
-                for dish in orders[email]["Dish"]:
+        for index in orders:
+            if orders[index]["Status"] == "Pending":
+                print(orders[index]["Customer"])
+                print(f"Status: {orders[index]["Status"]}")
+                for dish in orders[index]["Dish"]:
                     print(
                         f"{dish["Dish Name"]} -> Quantity: {dish["Quantity"]}")
                 print()
@@ -69,16 +69,16 @@ def update_order_status(chef_email):
     index = 1
     exists = False
 
-    for customer in orders:
-        if orders[customer]["Status"] == "Pending":
+    for count in orders:
+        if orders[count]["Status"] == "Pending":
             total_price = 0
             exists = True
 
             print()
             print(f"INDEX: {index}")
-            print(f"STATUS: {orders[customer]["Status"]}")
+            print(f"STATUS: {orders[count]["Status"]}")
             print("DISH: ")
-            for dish in orders[customer]["Dish"]:
+            for dish in orders[count]["Dish"]:
                 print(f"\t{dish["Dish Name"]}")
                 print(f"\tQuantity -> {dish["Quantity"]}")
 
@@ -88,7 +88,7 @@ def update_order_status(chef_email):
             print()
             indexingPrice[index] = total_price
 
-            indexingMenu[index] = customer
+            indexingMenu[index] = index
             index += 1
 
     if not exists:
@@ -252,3 +252,4 @@ def chef_menu(chef_email):
             print("Incorrect Choice!!, Please try again.")
 
 
+chef_menu("chris1@gmail.com")

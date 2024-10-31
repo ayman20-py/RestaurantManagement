@@ -97,27 +97,29 @@ def writeMenu(newData):
 
 def readOrders():
     orders = {}
+    index = 1
     with open("Dataset/orders.txt", "r") as file:
     	buffer = file.read()
     	rawData = [i for i in buffer.split("\n") if i != ""]
 
     	for lines in rawData:
     		data = lines.split(",")
-    		orders[data[0]] = {"Status": data[1], "Dish": []}
+    		orders[index] = {"Customer": data[0], "Status": data[1], "Dish": []}
     		for dishes in data[2:]:
     			foods = [i for i in dishes.split(":") if i != ""] 
     			if foods != []:
-	    			orders[data[0]]["Dish"].append({"Dish Name": foods[0], "Quantity": foods[1]})
+	    			orders[index]["Dish"].append({"Dish Name": foods[0], "Quantity": foods[1]})
 
+	    	index += 1
     return orders
 
 
 # customer@gmail.com,Pending,Chicken Achari:2,Fatimah Butter:3
 def writeOrders(orders):
 	with open("Dataset/orders.txt", "w") as file:
-		for customer in orders:
-			line = f"{customer},{orders[customer]["Status"]},"
-			for i in orders[customer]["Dish"]:
+		for index in orders:
+			line = f"{orders[index]["Customer"]},{orders[index]["Status"]},"
+			for i in orders[index]["Dish"]:
 				line = f"{line}{i["Dish Name"]}:{i["Quantity"]},"
 
 			
