@@ -44,7 +44,9 @@ def writeCredentials(newData):
 			data = newData[email]
 			if data["Role"] == "Admin":
 				buffer = f"{data["Role"]} {data["Nickname"]} {email} {data["Password"]} {data["Salary"]} {data["Contact Info"]}"
-			elif data["Role"] == "Manager" or data["Role"] == "Chef":
+			elif data["Role"] == "Manager":
+				buffer = f"{data["Role"]} {data["Nickname"]} {email} {data["Password"]} {data["Status"]} {data["Salary"]} {data["Contact Info"]}"
+			elif data["Role"] == "Chef":
 				buffer = f"{data["Role"]} {data["Nickname"]} {email} {data["Password"]} {data["Status"]} {data["Salary"]} {data["Contact Info"]}"
 			elif data["Role"] == "Customer":
 				buffer = f"{data["Role"]} {data["Nickname"]} {email} {data["Password"]} {data["NumberOfVisit"]} {data["Contact Info"]}"
@@ -92,3 +94,52 @@ def writeMenu(newData):
 
 	prGreen("Data has successfully been modified!!")
 
+
+def readOrders():
+    orders = {}
+    with open("Dataset/orders.txt", "r") as file:
+    	buffer = file.read()
+    	rawData = [i for i in buffer.split("\n") if i != ""]
+
+    	for lines in rawData:
+    		data = lines.split(",")
+    		orders[data[0]] = {"Status": data[1], "Dish": []}
+    		for dishes in data[2:]:
+    			foods = [i for i in dishes.split(":") if i != ""] 
+    			if foods != []:
+	    			orders[data[0]]["Dish"].append({"Dish Name": foods[0], "Quantity": foods[1]})
+
+    return orders
+
+
+# customer@gmail.com,Pending,Chicken Achari:2,Fatimah Butter:3
+def writeOrders(orders):
+	with open("Dataset/orders.txt", "w") as file:
+		for customer in orders:
+			line = f"{customer},{orders[customer]["Status"]},"
+			for i in orders[customer]["Dish"]:
+				line = f"{line}{i["Dish Name"]}:{i["Quantity"]},"
+
+			
+			file.write(f"{line}\n")
+
+def readIngredients():
+	ingredients = {}
+	index = 1
+	with open("Dataset/ingredients.txt", "r") as file:
+		rawData = file.read()
+		data = [i for i in rawData.split("\n") if i != ""]
+		for rawLine in data:
+			line = rawLine.split(",")
+			ingredients[index] = {"Chef": line[0], "Ingredient": line[1], "Quantity": line[2]}
+			index += 1
+
+	return ingredients
+
+def writeIngredients(ingredients):
+	with open("Dataset/ingredients.txt", "w") as file:
+		for index in ingredients:
+			currentIngredient = ingredients[index]
+			line = f"{currentIngredient["Chef"]},{currentIngredient["Ingredient"]},{currentIngredient["Quantity"]}"
+			print(line)
+			file.write(f"{line}\n")

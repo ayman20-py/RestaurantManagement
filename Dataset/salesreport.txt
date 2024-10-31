@@ -1,0 +1,5 @@
+chris1@gmail.com,10,64.0
+chris1@gmail.com,10,67.5
+newpaul@gmail.com,10,64.0
+newpaul@gmail.com,11,67.5
+newpaul@gmail.com,11,64.0

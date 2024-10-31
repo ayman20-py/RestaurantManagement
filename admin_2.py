@@ -1,4 +1,3 @@
-
 from datasetManipulation import readCredentials, appendCredentials, writeCredentials
 import os 
 from styles import *
@@ -16,7 +15,6 @@ def verifyEmail(email):
 def viewStaff():
 
     info = readCredentials() # Read the credentials from the credentials.txt
-
 
     for email in info:
 
@@ -109,12 +107,20 @@ def addNewStaff():
 
     if not cancelled:
         newNickname = input("enter the new staff's nickname: ")	
+
+        # Checks if the email already exists.
+        while True:
+            info = readCredentials()
+            newEmail = input("enter the new staff's email: ")	
+            if newEmail in info:
+                prRed("Email already exists in the system")
+            else:
+                break
+            
         newPassword = input("enter the new staff's password: ")	
-        newEmail = input("enter the new staff's email: ")	
         newSalary = input("enter the new staff's salary: ")	
         newContactInfo = input("Enter the new staff's contact number: ")	
 
-        print(newRole)
         data = f"\n{newRole} {newNickname} {newEmail} {newPassword} offduty {newSalary} {newContactInfo}"
         appendCredentials(data)
 
@@ -215,6 +221,7 @@ def editStaff():
                 prGreen("Select the new role!")
                 print("\t1. Manager")
                 print("\t2. Chef")
+                print("\t0. Cancel")
                 print()
                 valid = False
 
@@ -226,6 +233,9 @@ def editStaff():
                         break
                     elif newRole == 2:
                         info[selectedEmail]["Role"] = "Chef"
+                        break
+                    elif newRole == 0:
+                        prRed("Cancelling operation!")
                         break
                     else:
                         prRed("Please input a valid index!!")
@@ -267,6 +277,17 @@ def deleteStaff():
 
     # Re-writing all the data with the updated value
     writeCredentials(info)
+
+def viewFeedback():
+    prGreen("Customer feedbacks\n")
+    with open("Dataset/feedback.txt", "r") as file:
+        feedbacks = [i for i in file.read().split("\n") if i != ""]
+        for line in feedbacks:
+            data = line.split(": ")
+            prLightPurple(data[0])
+            print(data[1])
+            print()
+
 
 
 def editOwnProfile(adminEmail):
@@ -320,12 +341,13 @@ def editOwnProfile(adminEmail):
                     del info[adminEmail]
                     prRed("Loging out of the system!")
                     writeCredentials(info)
-                    return
+                    quit()
                 else:
                     prRed("Cancelling operation!")
 
             else:
                 prRed("Invalid index!!")
+    return adminEmail
 
 
 
@@ -367,11 +389,12 @@ def adminFunctions(adminEmail):
 
             elif command == 5:
                 pass
+
             elif command == 6:
-                pass
+                viewFeedback()
 
             elif command == 7:
-                editOwnProfile(adminEmail)
+                adminEmail = editOwnProfile(adminEmail)
 
             elif command == 8:
                 os.system("cls")
@@ -384,6 +407,3 @@ def adminFunctions(adminEmail):
         except Exception as e:
             print(e)
 
-    
-
-adminFunctions("admin1@gmail.com")

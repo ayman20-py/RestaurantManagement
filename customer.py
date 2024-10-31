@@ -1,64 +1,111 @@
-############################################################
-# When editing own profile, the current email cannot be changed to the new email in the buffer itself
-############################################################
-
-############################################################
-# Didn't add the discount on every 5 visits functionality
-############################################################
-
-from datasetManipulation import readMenu, appendCredentials, writeCredentials, readCredentials
+from datasetManipulation import readMenu, appendCredentials, writeCredentials, readCredentials, readOrders
 from styles import *
+import os
 
-import re
-def verifyEmail(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if re.match(pattern, email):
-        return True
-    return False
+###############################################
+# The customer should be able to change the cart after the order has been placed and the status is still PENDING
+###############################################
+orders = []
+
+
+def checkLogin():
+    credentials = readCredentials()
+    os.system("cls")
+
+    print("\nWelcome to the restaurant!!")
+    print("Please login to the system\n")
+
+    emailInput = input("Please enter your email: ")
+
+    if emailInput in credentials:
+        currentRole = credentials[emailInput]["Role"]
+        nickname = credentials[emailInput]["Nickname"]
+        os.system("cls")
+        print()
+        prGreen("Login Successful!")
+        prLightPurple(f"Role: {currentRole}")
+        print(f" Hi {nickname}!")
+        return {"email": emailInput, "response": True, "role": currentRole}
+    else:
+        print("Error, email not found")
+        return {"response": False}
+
+
+def applyDiscount(visits):
+    """Apply discount if customer has visited more than 5 times."""
+    if visits >= 5:
+        print("You've qualified for a 10% discount on your total!")
+        return 0.10
+    return 0.0
+
 
 def viewFoodMenu():
-
-    # Reading the menu
+    """Displays the food menu."""
     food_items = readMenu()
     if not food_items:
         print("No food items available.")
         return {}
-    for dish_name, details in food_items.items():
-        print(f"{dish_name} - ${details['Price']}")
+
+    print("Curry")
+    for food in food_items:
+        if food_items[food]["Type"] == "Curry":
+           print(f"\t{food} - RM{food_items[food]["Price"]}") 
+
+    print("Flat Breads")
+    for food in food_items:
+        if food_items[food]["Type"] == "Flat Breads":
+           print(f"\t{food} - RM{food_items[food]["Price"]}") 
+
+    print("Rice")
+    for food in food_items:
+        if food_items[food]["Type"] == "Rice":
+           print(f"\t{food} - RM{food_items[food]["Price"]}") 
+
+    print("Beverage")
+    for food in food_items:
+        if food_items[food]["Type"] == "Beverage":
+           print(f"\t{food} - RM{food_items[food]["Price"]}") 
+
     return food_items
 
-def orderFood():
+
+def orderFood(visits, customerEmail):
+    """Handles the food ordering process."""
     food_items = viewFoodMenu()
     if not food_items:
         return
 
-    cart = {}
+    cart = []
+    cartName = []
+    discount = applyDiscount(visits)
 
     while True:
+
         if cart:
             print("\nYour Cart:")
-            for dish_name, quantity in cart.items():
-                price = float(food_items[dish_name]['Price'])
-                print(f"{dish_name} - Quantity: {quantity} - Total: ${price * quantity:.2f}")
+            for item in cart:
+                print(f"{item['name']} - Quantity: {item['quantity']} - Total: ${item['price'] * item['quantity']:.2f}")
         else:
             print("\nYour Cart is empty.")
+
 
         print("\n1. Add Food to Cart")
         print("2. Edit Food in Cart")
         print("3. Delete Food from Cart")
-        print("4. Confirm Order")
-        print("0. Exit")
+        print("4. Confirm & Exit")
+        print("0. Exit without saving")
+
 
         command = input("Enter command >> ")
 
         if command == '1':
             dish_name = input("Enter the food name to add to cart >> ")
             if dish_name in food_items:
-
                 try:
                     quantity = int(input("Enter quantity >> "))
                     if quantity > 0:
-                        cart[dish_name] = cart.get(dish_name, 0) + quantity
+                        price = float(food_items[dish_name]['Price'].replace(',', ''))  # Remove any commas
+                        cart.append({"name": dish_name, "quantity": quantity, "price": price})
                         print("Item added to cart!")
                     else:
                         print("Quantity must be greater than 0!")
@@ -69,108 +116,118 @@ def orderFood():
 
         elif command == '2':
             dish_name = input("Enter the food name to edit in cart >> ")
-            if dish_name in cart:
-                try:
-                    quantity = int(input("Enter new quantity >> "))
-                    if quantity > 0:
-                        cart[dish_name] = quantity
-                        print("Cart updated!")
-                    else:
-                        print("Quantity must be greater than 0!")
-                except ValueError:
-                    print("Invalid quantity! Please enter a number.")
+            for item in cart:
+                if item['name'] == dish_name:
+                    try:
+                        quantity = int(input("Enter new quantity >> "))
+                        if quantity > 0:
+                            item['quantity'] = quantity
+                            print("Cart updated!")
+                        else:
+                            print("Quantity must be greater than 0!")
+                    except ValueError:
+                        print("Invalid quantity! Please enter a number.")
+                    break
             else:
                 print("Item not in cart!")
 
         elif command == '3':
             dish_name = input("Enter the food name to remove from cart >> ")
-            if dish_name in cart:
-                del cart[dish_name]
-                print("Item removed from cart!")
+            for item in cart:
+                if item['name'] == dish_name:
+                    cart.remove(item)
+                    print("Item removed from cart!")
+                    break
             else:
                 print("Item not in cart!")
 
         elif command == '4':
             if cart:
-                total_amount = sum(float(food_items[dish_name]['Price']) * quantity for dish_name, quantity in cart.items())
-                print(f"Total amount to pay: ${total_amount:.2f}")
+                for items in cart:
+                    cartName.append(f"{items["name"]}:{items["quantity"]}") 
+
+                total_amount = sum(item['price'] * item['quantity'] for item in cart)
+                total_amount *= (1 - discount)
+                print(f"Total amount to pay (after discount, if applicable): ${total_amount:.2f}")
+
+                with open("Dataset/orders.txt", "a") as file:
+                    # Format for the orders
+                    # customerEmail, status, ...orders
+                    file.write(f"{customerEmail},Pending,{",".join(cartName)}\n")
+
                 print("Order confirmed!")
                 cart.clear()
+                break
             else:
                 print("Your cart is empty!")
 
-        elif command == '0':
-            break
 
+        elif command == "0":
+            print("Exit without saving")
+            break
+        
         else:
             print("Invalid command!")
 
-def viewOrderStatus():
-    orders = {1: "Completed", 2: "Pending"}
-    for order_id, status in orders.items():
-        print(f"Order ID: {order_id} - Status: {status}")
+
+def viewOrderStatus(customerEmail):
+    customerOrders = readOrders()
+    count = 1
+    for customers in customerOrders:
+        if customers == customerEmail:
+            print()
+            print(f"Order {count}")
+            for dish in customerOrders[customers]["Dish"]:
+                print(f"\tDish Name: {dish["Dish Name"]}")
+                print(f"\tQuantity: {dish["Quantity"]}")
+            print()
+            print(f"Status: {customerOrders[customers]["Status"]}")
+
+
+
 
 def sendFeedback(customerEmail):
-    feedback = input("Enter your feedback: ").strip()
-    if feedback:
-        appendCredentials(f"\nFeedback from {customerEmail}: {feedback}")
-        print("Thank you for your feedback!")
-    else:
-        print("Feedback cannot be empty!")
+    """Handles feedback submission."""
+    feedback = input("Please enter your feedback: ")
 
-def updateProfile(email):
-    customerEmail = email
-    print(customerEmail)
+    with open("Dataset/feedback.txt", "a") as feedback_file:
+        feedback_file.write(f"{customerEmail}: {feedback}\n")
+
+    prGreen("Thank you for your feedback! We appreciate your input and will use it to improve our service.")
+
+def updateProfile(customerEmail):
+    """Handles profile update."""
     info = readCredentials()
-    if customerEmail not in info:
+    customer_data = info.get(customerEmail, {})
+
+    if not customer_data:
         print("Customer not found!")
         return
 
-    while True:
-        print("\nUpdate Profile:")
-        print("1. Update Nickname")
-        print("2. Update Email")
-        print("3. Update Password")
-        print("0. Save & Exit")
+    print(f"Current Nickname: {customer_data['Nickname']}")
+    print(f"Current Contact Info: {customer_data['Contact Info']}")
 
-        command = input("Enter command >> ")
+    new_nickname = input("Enter new nickname (or press Enter to keep current): ")
+    new_contact_info = input("Enter new contact info (or press Enter to keep current): ")
 
-        if command == '1':
-            new_nickname = input("Enter new nickname: ").strip()
-            if new_nickname:
-                info[customerEmail]["Nickname"] = new_nickname
-                print("Nickname updated!")
-            else:
-                print("Nickname cannot be empty!")
 
-        elif command == '2':
-            new_email = input("Enter new email: ").strip()
-            if verifyEmail(new_email):
-                info[new_email] = info[customerEmail]
-                # del info[customerEmail]
-                info[new_email] = info.pop(customerEmail)
-                customerEmail = new_email
-                print(f"Current: {customerEmail}")
-                print("Email updated!")
-            else:
-                print("Invalid email address!")
+    if new_nickname:
+        customer_data["Nickname"] = new_nickname
+    if new_contact_info:
+        customer_data["Contact Info"] = new_contact_info
 
-        elif command == '3':
-            new_password = input("Enter new password: ").strip()
-            if new_password:
-                info[customerEmail]["Password"] = new_password
-                print("Password updated!")
-            else:
-                print("Password cannot be empty!")
 
-        elif command == '0':
-            writeCredentials(info)
-            break
+    info[customerEmail] = customer_data
+    writeCredentials(info)
+    prGreen("Profile updated successfully!")
 
-        else:
-            print("Invalid command!")
+
 
 def customerFunctions(customerEmail):
+    """Main function for handling customer actions."""
+    info = readCredentials()
+    visits = info[customerEmail].get("NumberOfVisit", 0)
+
     while True:
         print("\nCustomer Functions:")
         print("1. View & Order Food")
@@ -179,19 +236,22 @@ def customerFunctions(customerEmail):
         print("4. Update Profile")
         print("0. Logout")
 
+
         command = input("Enter command >> ")
 
         if command == '1':
-            orderFood()
+            orderFood(visits, customerEmail)
+            visits += 1
+            info[customerEmail]["NumberOfVisit"] = visits
+            writeCredentials(info)
 
         elif command == '2':
-            viewOrderStatus()
+            viewOrderStatus(customerEmail)
 
         elif command == '3':
             sendFeedback(customerEmail)
 
         elif command == '4':
-            # To check when editing the email
             updateProfile(customerEmail)
 
         elif command == '0':
@@ -201,3 +261,7 @@ def customerFunctions(customerEmail):
         else:
             print("Invalid command!")
 
+
+
+if __name__ == "__main__":
+    customerFunctions("customer@gmail.com") 
