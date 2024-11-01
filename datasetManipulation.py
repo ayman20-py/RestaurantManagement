@@ -145,3 +145,24 @@ def writeIngredients(ingredients):
 			line = f"{currentIngredient["Chef"]},{currentIngredient["Ingredient"]},{currentIngredient["Quantity"]}"
 			print(line)
 			file.write(f"{line}\n")
+
+def readSales():
+	sales = {}
+	index = 1
+	with open("Dataset/salesreport.txt", "r") as file:
+		rawData = file.read()
+		data = [i for i in rawData.split("\n") if i != ""]
+		for rawLine in data:
+			line = rawLine.split(',')
+			sales[index] = {"Chef": line[0], "Month": line[1], "Amount": line[2]}
+			index += 1
+
+	return sales
+
+def writeSales(sales):
+	with open("Dataset/salesreport.txt", "w") as file:
+		for index in sales:
+			currentSale = sales[index]
+			line = f"{currentSale["Chef"]},{currentSale["Month"]},{currentSale["Amount"]}"
+			file.write(f"{line}\n")
+			

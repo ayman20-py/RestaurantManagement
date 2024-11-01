@@ -13,10 +13,14 @@ Sales_report_file = 'Dataset/salesreport.txt'  # File to store sales data
 
 def update_profile(chef_email):
     infoCred = readCredentials()
+
+    sales = readSales()
+
     name = input("Enter your new name: ")
     email = input("Enter your new email: ")
 
     # Update profile in credentials.txt
+    oldName = infoCred[chef_email]["Nickname"]
     newRecord = infoCred[chef_email]
     infoCred[email] = newRecord
     infoCred[email]["Nickname"] = name
@@ -24,6 +28,22 @@ def update_profile(chef_email):
     del infoCred[chef_email]
     writeCredentials(infoCred)
 
+    for index in sales:
+        if sales[index]["Chef"] == chef_email:
+            sales[index]["Chef"] = email
+
+    writeSales(sales)
+
+
+    ingredients = readIngredients()
+
+    print(infoCred[email]["Nickname"])
+    for index in ingredients:
+        if ingredients[index]["Chef"] == oldName:
+            ingredients[index]["Chef"] = name
+
+    print(ingredients)
+    writeIngredients(ingredients)
 
 
 # function to get the chef's name from credentials.txt
@@ -252,4 +272,4 @@ def chef_menu(chef_email):
             print("Incorrect Choice!!, Please try again.")
 
 
-chef_menu("chris1@gmail.com")
+chef_menu("newpaul@gmail.com")
