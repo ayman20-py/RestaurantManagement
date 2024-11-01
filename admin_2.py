@@ -1,4 +1,4 @@
-from datasetManipulation import readCredentials, appendCredentials, writeCredentials
+from datasetManipulation import *
 import os 
 from styles import *
 
@@ -349,7 +349,58 @@ def editOwnProfile(adminEmail):
                 prRed("Invalid index!!")
     return adminEmail
 
+def viewSales():
+    sales = readSales()
+    infoCred = readCredentials()
 
+    indexingChef = {}
+    index = 1
+    indexingChef[0] = "Cancel"
+
+    for email in infoCred:
+        if infoCred[email]["Role"] == "Chef":
+
+            prLightPurple(f"{index}")
+            print("Name: ", end='')
+            prGreen(infoCred[email]["Nickname"])
+
+            indexingChef[index] = email
+            index += 1
+
+    prRed("0")
+    prRed("Cancel")
+
+    proceed = False
+    while True:
+        selectedChef = int(input("\nEnter the index of the chef you want to view: "))
+        if selectedChef not in indexingChef:
+            prRed("Please select a valid index!!")
+        elif selectedChef == 0:
+            print("Cancelling operation!!")
+            break
+        else:
+            proceed = True 
+            break
+
+    if proceed:
+        while True:
+            month = int(input("Enter the month index: "))
+            if month not in range(1, 13):
+                prRed("Please select a valid month index!!")
+            else:
+                break
+
+        print("\nName: ", end="")
+        prLightPurple(f"{infoCred[indexingChef[selectedChef]]["Nickname"]}")
+
+        total_sales = 0
+
+        for index in sales:
+            if sales[index]["Chef"] == indexingChef[selectedChef] and int(sales[index]["Month"]) == month:
+                total_sales += float(sales[index]["Amount"])
+
+        print("Total Sales: ", end="")
+        prRed(total_sales)
 
 def adminFunctions(adminEmail):
     featuresMessage = """
@@ -388,7 +439,7 @@ def adminFunctions(adminEmail):
                 deleteStaff()
 
             elif command == 5:
-                pass
+                viewSales()
 
             elif command == 6:
                 viewFeedback()
@@ -407,3 +458,4 @@ def adminFunctions(adminEmail):
         except Exception as e:
             print(e)
 
+adminFunctions("admin@gmail.com")

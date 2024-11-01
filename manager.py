@@ -16,7 +16,7 @@ def managerFunctions(managerEmail):
     global dishname          #Variables that are created outside of a function are known as global variables.
     featuresMessage = """
     Manager features:
-    1. View & Edit Chef information.
+    1. Add new customer.
     2. View ingredients requested by the chef. 
     3. Edit information about menu.
     4. Edit information about customer.
@@ -30,76 +30,24 @@ def managerFunctions(managerEmail):
     while True:             # While True statement used to create an infinite loop
         try:                  # try statement used so that program will not display error message
 
-
             print()   #for leaving enpty line in between codes
             command = int(input("Enter command for Manager features >> "))   #view which chef is on duty or off duty.
             if command == 1:
-                customizeChef = {}                # create a dictionary
-                customizeChef[0] = "cancel"        # Implement a cancel function if any mistake occur
-                info = readCredentials()
-                num = 1
-                for email in info:
-                    if info[email]["Role"] == "Chef":
-                        print(f"{num}")
 
-                        print(" Nickname: ", end="")              # Used End for aesthethics purposes
-                        print(f"{info[email]["Nickname"]}")         # the end="" is used to place a space after the displayed string instead of a newline.
-
-                        print(" Email: ", end="")
-                        print(email)
-
-                        print(" Salary: ", end="")
-                        print(info[email]["Salary"])
-
-                        print(" Chef status: ", end="")
-                        print(info[email]["Status"])
-
-                        print(" Contact info: ", end="")
-                        print(info[email]["Contact Info"])
-
-                        prGreen(f"Chef {info[email]["Nickname"]} is {"on duty" if info[email]["Status"] == "on" else "off duty"}")   # Validate if chef is on/off duty and will print the result.
-                        print()
-
-                        customizeChef[num] = email
-
-                        num+= 1
-
+                customerName = input("Enter the new customer name: ")
+                
                 while True:
-                    editChef = int(input("Enter index of the chef you want to edit or '0' to cancel >> "))
-                    if editChef not in customizeChef:                                                         # Validating/checking if index entered is valid
-                        print("Invalid!!", "\nPlease select a valid index.")                                     # If not, it will print this
-                    elif editChef == 0:
-                        print("Exiting operation!!")
+                    customerEmail = input("Enter the customer email: ")
+                    if verifyEmail(customerEmail):
                         break
-
                     else:
-                        print()
-                        print(f"Editing {info[customizeChef[editChef]]["Nickname"]}'s information")
-                        selectEmail = customizeChef[editChef]
-                        print(selectEmail)
+                        print("Please enter a valid email!!")
 
+                customerPass = input("Enter the new customer password: ")
+                customerContact = input("Enter the new customer contact number: ")
 
-                    while True:                   # Updating status of chef
-                        print()
-                        print("\t1. Status")
-                        print()
-
-                        EditIndex = int(input("Please enter index >> "))
-
-                        if EditIndex != 1:
-                           print("Please only enter the given index")
-                           break
-
-                        elif EditIndex == 1:
-                            NewStatus = str(input("Please enter new status on/off duty: "))
-                            info[selectEmail]["Status"] = NewStatus
-
-                            writeCredentials(info)              # Will Overwrite data in credentials.txt for chef "Status" and terminate the task
-                            break
-
-
-
-
+                appendCredentials(f"\nCustomer {customerName} {customerEmail} {customerPass} 0 {customerContact}")
+                
             elif command == 2:                                # Displaying ingredients requested by chef
                 print(f"Ingredients requested by chef >> ")
                 f = open("Dataset/ingredients.txt", "r")        # Opens dataset/ingredients.txt file

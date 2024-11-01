@@ -165,4 +165,3 @@ def writeSales(sales):
 			currentSale = sales[index]
 			line = f"{currentSale["Chef"]},{currentSale["Month"]},{currentSale["Amount"]}"
 			file.write(f"{line}\n")
-			
