@@ -47,29 +47,6 @@ def viewStaff():
             else:
                 prGreen("On Duty")
 
-        # Checking if the role is customer
-        elif info[email]["Role"] == "Customer":
-
-            print()
-
-            print("Nickname:", end=" ")
-            prGreen(f"{info[email]["Nickname"]}")
-
-            print("Role:", end=" ")
-            prPurple(info[email]["Role"])
-
-            print("Email:", end=" ")
-            prYellow(email)
-
-            print("Number of visits:", end=" ")
-            prRed(info[email]["NumberOfVisit"])
-
-            print("Contact Information:", end=" ")
-            prGreen(info[email]["Contact Info"])
-
-
-            print() # Empty line for display purposes
-
 
 def addNewStaff():
     print("Adding new staff")
@@ -263,20 +240,24 @@ def editStaff():
 
 def deleteStaff():
     info = readCredentials()
+    change = False
     while True:
         emailDel = input("Enter the email address of the staff you want to delete (Type '0' to cancel'): ")
-        if emailDel in info or emailDel == '0':
+        if emailDel in info:
             print("Email found, deleting entity!")
+            change = True 
             break
         else:
             prRed("This email is not found in the system!! Please try again.")
 
-    if emailDel != "0":
+    if emailDel != "0" and change:
         prRed(f"Deleting data about {info[emailDel]["Nickname"]}")
         del info[emailDel]
+        writeCredentials(info)
 
-    # Re-writing all the data with the updated value
-    writeCredentials(info)
+    if emailDel == "0":
+        prRed("Cancelling operation!!")
+
 
 def viewFeedback():
     prGreen("Customer feedbacks\n")
@@ -458,4 +439,4 @@ def adminFunctions(adminEmail):
         except Exception as e:
             print(e)
 
-adminFunctions("admin@gmail.com")
+adminFunctions("sk")

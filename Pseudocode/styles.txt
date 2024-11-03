@@ -1,0 +1,31 @@
+FUNCTION prRed(skk)
+    PRINT formatted string with red color using ANSI code for red and skk
+ENDFUNCTION
+
+FUNCTION prGreen(skk)
+    PRINT formatted string with green color using ANSI code for green and skk
+ENDFUNCTION
+
+FUNCTION prYellow(skk)
+    PRINT formatted string with yellow color using ANSI code for yellow and skk
+ENDFUNCTION
+
+FUNCTION prLightPurple(skk)
+    PRINT formatted string with light purple color using ANSI code for light purple and skk
+ENDFUNCTION
+
+FUNCTION prPurple(skk)
+    PRINT formatted string with purple color using ANSI code for purple and skk
+ENDFUNCTION
+
+FUNCTION prCyan(skk)
+    PRINT formatted string with cyan color using ANSI code for cyan and skk
+ENDFUNCTION
+
+FUNCTION prLightGray(skk)
+    PRINT formatted string with light gray color using ANSI code for light gray and skk
+ENDFUNCTION
+
+FUNCTION prBlack(skk)
+    PRINT formatted string with black color using ANSI code for black and skk
+ENDFUNCTION

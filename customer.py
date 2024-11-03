@@ -348,4 +348,4 @@ def customerFunctions(customerEmail):
 
 
 if __name__ == "__main__":
-    customerFunctions("pedro@gmail.com") 
+    customerFunctions("customer@gmail.com") 

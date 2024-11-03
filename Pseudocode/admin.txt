@@ -1,5 +1,429 @@
-Function viewStaff()
+IMPORT readCredentials FROM datasetManipulation
+IMPORT os 
+IMPORT styles
+IMPORT re  // for validating an Email
 
-  
+FUNCTION verifyEmail(email)
+    SET pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    IF re.match(pattern, email) THEN
+        RETURN True
+    END IF
+    RETURN False
+ENDFUNCTION
 
-EndFunction
+FUNCTION viewStaff()
+    SET info = readCredentials()  // Read the credentials from the credentials.txt
+
+    DOWHILE email IN info
+        IF info[email]["Role"] IN ["Chef", "Manager"] THEN
+            PRINT ""
+            PRINT "Nickname:", end=" "
+            CALL prGreen with info[email]["Nickname"]
+
+            PRINT "Role:", end=" "
+            CALL prPurple with info[email]["Role"]
+
+            PRINT "Email:", end=" "
+            CALL prYellow with email
+
+            PRINT "Salary:", end=" "
+            CALL prRed with info[email]["Salary"]
+
+            PRINT "Contact Information:", end=" "
+            CALL prGreen with info[email]["Contact Info"]
+
+            PRINT "Status: ", end=" "
+            IF info[email]["Status"] == "offduty" THEN
+                CALL prRed with "Off Duty"
+            ELSE
+                CALL prGreen with "On Duty"
+            END IF
+        END IF
+    ENDDO
+ENDFUNCTION
+
+FUNCTION addNewStaff()
+    PRINT "Adding new staff"
+    PRINT "Chose the role"
+    PRINT "\t1. Admin"
+    PRINT "\t2. Manager"
+    PRINT "\t3. Chef"
+    PRINT "\t0. Cancel"
+
+    SET error = True
+    SET cancelled = False
+    SET newRole = ""
+
+    DOWHILE error
+        TRY
+            SET newRoleIndex = INPUT "Enter the index >> "
+            IF newRoleIndex == 0 THEN
+                SET error = False
+                SET cancelled = True
+                CALL prPurple with "Cancelled!!"
+            ELSEIF newRoleIndex == 1 THEN
+                SET newRole = "Admin"
+                SET error = False
+            ELSEIF newRoleIndex == 2 THEN
+                SET newRole = "Manager"
+                SET error = False
+            ELSEIF newRoleIndex == 3 THEN
+                SET newRole = "Chef"
+                SET error = False
+            ELSE
+                CALL prRed with "Please enter a valid index!!"
+            END IF
+        EXCEPTION AS e
+            SET newRole = None
+            CALL prRed with e
+    ENDDO
+
+    IF NOT cancelled THEN
+        SET newNickname = INPUT "enter the new staff's nickname: "
+        
+        DOWHILE True
+            SET info = readCredentials()
+            SET newEmail = INPUT "enter the new staff's email: "
+            IF newEmail IN info THEN
+                CALL prRed with "Email already exists in the system"
+            ELSE
+                BREAK
+            END IF
+        ENDDO
+
+        SET newPassword = INPUT "enter the new staff's password: "
+        SET newSalary = INPUT "enter the new staff's salary: "
+        SET newContactInfo = INPUT "Enter the new staff's contact number: "
+        
+        SET data = f"\n{newRole} {newNickname} {newEmail} {newPassword} offduty {newSalary} {newContactInfo}"
+        CALL appendCredentials with data
+    ENDIF
+ENDFUNCTION
+
+FUNCTION editStaff()
+    SET info = readCredentials()
+    CALL prRed with "Edit staff information"
+
+    SET indexingStaff = {}
+    SET indexingStaff[0] = "Cancel"
+    SET index = 1
+
+    DOWHILE email IN info
+        IF info[email]["Role"] IN ["Manager", "Chef"] THEN
+            PRINT "Here"
+            CALL prLightPurple with index
+
+            PRINT " Nickname:", end=""
+            CALL prGreen with info[email]["Nickname"]
+
+            PRINT " Role:", end=""
+            CALL prPurple with info[email]["Role"]
+
+            PRINT " Email:", end=""
+            CALL prYellow with email
+
+            SET indexingStaff[index] = email
+            INCREMENT index
+        END IF
+    ENDDO
+
+    DOWHILE True
+        SET staffEdit = INPUT "Enter the index of the staff's information you want to edit >> "
+        IF staffEdit NOT IN indexingStaff THEN
+            CALL prRed with "Please select a valid index!!"
+            SET proceed = False
+        ELSEIF staffEdit == 0 THEN
+            CALL prLightGray with "Cancelling operation!!"
+            SET proceed = False
+            BREAK
+        ELSE
+            CALL prGreen with f"Editing {info[indexingStaff[staffEdit]]["Nickname"]}'s information"
+            SET selectedEmail = indexingStaff[staffEdit]
+            CALL prGreen with selectedEmail
+            SET proceed = True
+            BREAK
+        ENDIF
+    ENDDO
+
+    IF proceed THEN
+        DOWHILE True
+            PRINT ""
+            PRINT "\t1. Nickname"
+            PRINT "\t2. Email"
+            PRINT "\t3. Role"
+            PRINT "\t4. Salary"
+            CALL prRed with "\t5. Delete current staff"
+            PRINT "\t0. Save & Exit"
+            PRINT ""
+
+            SET editCommand = INPUT "Enter the index >> "
+
+            IF editCommand == 0 THEN
+                CALL writeCredentials with info
+                BREAK
+            ELSEIF editCommand == 1 THEN
+                SET newName = INPUT "Enter the new nickname: "
+                DOWHILE newName IN ["", " "] 
+                    PRINT ""
+                    CALL prGreen with "Please enter a proper nickname!!"
+                    SET newName = INPUT "Enter the proper nickname: "
+                ENDDO
+                info[selectedEmail]["Nickname"] = newName
+            ELSEIF editCommand == 2 THEN
+                SET newEmail = INPUT "Enter the new email: "
+                IF verifyEmail(newEmail) THEN
+                    DOWHILE True
+                        IF newEmail.find("@") AND newEmail.find(".") AND newEmail.strip() THEN
+                            info[newEmail] = info[selectedEmail]
+                            DEL info[selectedEmail]
+                            SET selectedEmail = newEmail
+                            BREAK
+                        ENDIF
+                        PRINT ""
+                        CALL prRed with "Please enter a valid email!!"
+                        SET newEmail = INPUT "Enter the new email: "
+                    ENDDO
+                ELSE
+                    CALL prRed with "Invalid email address!!"
+                ENDIF
+            ELSEIF editCommand == 3 THEN
+                CALL prGreen with "Select the new role!"
+                PRINT "\t1. Manager"
+                PRINT "\t2. Chef"
+                PRINT "\t0. Cancel"
+                PRINT ""
+                SET valid = False
+
+                DOWHILE True
+                    SET newRole = INPUT "Enter the index >> "
+
+                    IF newRole == 1 THEN
+                        info[selectedEmail]["Role"] = "Manager"
+                        BREAK
+                    ELSEIF newRole == 2 THEN
+                        info[selectedEmail]["Role"] = "Chef"
+                        BREAK
+                    ELSEIF newRole == 0 THEN
+                        CALL prRed with "Cancelling operation!"
+                        BREAK
+                    ELSE
+                        CALL prRed with "Please input a valid index!!"
+                    ENDIF
+                ENDDO
+            ELSEIF editCommand == 4 THEN
+                DOWHILE True
+                    TRY
+                        SET newSalary = INPUT "Please enter the new salary: "
+                        info[selectedEmail]["Salary"] = newSalary
+                        BREAK
+                    EXCEPTION AS e
+                        CALL prRed with "Please enter a valid number!!"
+                ENDDO
+            ELSEIF editCommand == 5 THEN
+                SET confirmation = INPUT "Are you sure you want to delete your account(Y/N): ".lower()
+                IF confirmation == "y" THEN
+                    DEL info[selectedEmail]
+                    CALL prLightPurple with f"Deleting account with email: {adminEmail}"
+                ELSE
+                    CALL prRed with "Cancelled operation!"
+                ENDIF
+            ENDIF
+        ENDDO
+    ENDIF
+ENDFUNCTION
+
+FUNCTION deleteStaff()
+    SET info = readCredentials()
+    DOWHILE True
+        SET emailDel = INPUT "Enter the email address of the staff you want to delete (Type '0' to cancel'): "
+        IF emailDel IN info OR emailDel == '0' THEN
+            PRINT "Email found, deleting entity!"
+            BREAK
+        ELSE
+            CALL prRed with "This email is not found in the system!! Please try again."
+        ENDIF
+    ENDDO
+
+    IF emailDel != "0" THEN
+        CALL prRed with f"Deleting data about {info[emailDel]["Nickname"]}"
+        DEL info[emailDel]
+    ENDIF
+
+    // Re-writing all the data with the updated value
+    CALL writeCredentials with info
+ENDFUNCTION
+
+FUNCTION viewFeedback()
+    CALL prGreen with "Customer feedbacks\n"
+    WITH open "Dataset/feedback.txt" AS file
+        SET feedbacks = [i for i in file.read().split("\n") if i != ""]
+        DOWHILE line IN feedbacks
+            SET data = line.split(": ")
+            CALL prLightPurple with data[0]
+            PRINT data[1]
+            PRINT ""
+        ENDDO
+    END WITH
+ENDFUNCTION
+
+FUNCTION editOwnProfile(adminEmail)
+    SET info = readCredentials()
+    PRINT ""
+    CALL prGreen with "Editing own information"
+    PRINT "\t1. Nickname"
+    PRINT "\t2. Email"
+    PRINT "\t3. Password"
+    PRINT "\t4. Salary"
+    CALL prRed with "\t5. Delete own account"
+    PRINT "\t0. Save & Exit"
+    PRINT ""
+
+    DOWHILE True
+        SET editCommand = INPUT "Enter the index of the command you want to execute >> "
+
+        IF editCommand == 0 THEN
+            CALL writeCredentials with info
+            BREAK
+        ELSE
+            IF editCommand == 1 THEN
+                SET newNickname = INPUT "Enter your new nickname: "
+                info[adminEmail]["Nickname"] = newNickname
+            ELSEIF editCommand == 2 THEN
+                SET newEmail = INPUT "Enter your new email: "
+                IF verifyEmail(newEmail) THEN
+                    info[newEmail] = info[adminEmail]
+                    DEL info[adminEmail]
+                    adminEmail = newEmail
+                ELSE
+                    CALL prRed with "Invalid email address!!"
+                ENDIF
+            ELSEIF editCommand == 3 THEN
+                SET newPassword = INPUT "Enter your new password: "
+                info[adminEmail]["Password"] = newPassword
+            ELSEIF editCommand == 4 THEN
+                SET newSalary = INPUT "Enter your new salary: "
+                info[adminEmail]["Salary"] = newSalary
+            ELSEIF editCommand == 5 THEN
+                SET confirmation = INPUT "Are you sure you want to delete your account(Y/N): ".lower()
+                IF confirmation == "y" THEN
+                    CALL prLightPurple with f"Deleting account with email: {adminEmail}"
+                    DEL info[adminEmail]
+                    CALL prRed with "Logging out of the system!"
+                    CALL writeCredentials with info
+                    QUIT
+                ELSE
+                    CALL prRed with "Cancelling operation!"
+                ENDIF
+            ELSE
+                CALL prRed with "Invalid index!!"
+            ENDIF
+        ENDIF
+    ENDDO
+    RETURN adminEmail
+ENDFUNCTION
+
+FUNCTION viewSales()
+    SET sales = readSales()
+    SET infoCred = readCredentials()
+
+    SET indexingChef = {}
+    SET index = 1
+    SET indexingChef[0] = "Cancel"
+
+    DOWHILE email IN infoCred
+        IF infoCred[email]["Role"] == "Chef" THEN
+            CALL prLightPurple with index
+            PRINT "Name: ", end=''
+            CALL prGreen with infoCred[email]["Nickname"]
+            SET indexingChef[index] = email
+            INCREMENT index
+        ENDIF
+    ENDDO
+
+    CALL prRed with "0"
+    CALL prRed with "Cancel"
+
+    SET proceed = False
+    DOWHILE True
+        SET selectedChef = INPUT "\nEnter the index of the chef you want to view: "
+        IF selectedChef NOT IN indexingChef THEN
+            CALL prRed with "Please select a valid index!!"
+        ELSEIF selectedChef == 0 THEN
+            PRINT "Cancelling operation!!"
+            BREAK
+        ELSE
+            SET proceed = True 
+            BREAK
+        ENDIF
+    ENDDO
+
+    IF proceed THEN
+        DOWHILE True
+            SET month = INPUT "Enter the month index: "
+            IF month NOT IN range(1, 13) THEN
+                CALL prRed with "Please select a valid month index!!"
+            ELSE
+                BREAK
+            ENDIF
+        ENDDO
+
+        PRINT "\nName: ", end=""
+        CALL prLightPurple with infoCred[indexingChef[selectedChef]]["Nickname"]
+
+        SET total_sales = 0
+
+        DOWHILE index IN sales
+            IF sales[index]["Chef"] == indexingChef[selectedChef] AND int(sales[index]["Month"]) == month THEN
+                total_sales += float(sales[index]["Amount"])
+            ENDIF
+        ENDDO
+
+        PRINT "Total Sales: ", end=""
+        CALL prRed with total_sales
+    ENDIF
+ENDFUNCTION
+
+FUNCTION adminFunctions(adminEmail)
+    SET featuresMessage = """
+    Admin features:
+    1. View all the staff information (Manager, Chef).
+    2. Add a new staff.
+    3. Edit information about an existing staff.
+    4. Delete a staff.
+    5. View the monthly sales report.
+    6. View customer feedbacks.
+    7. Edit own profile.
+    8. Display the command message
+    0. Logout
+    """
+    PRINT featuresMessage
+
+    DOWHILE True
+        TRY
+            SET command = INPUT "\033[93m {}\033[00m".format("\nEnter the command index >> ")
+
+            IF command == 1 THEN
+                CALL viewStaff()
+            ELSEIF command == 2 THEN
+                CALL addNewStaff()
+            ELSEIF command == 3 THEN
+                CALL editStaff()
+            ELSEIF command == 4 THEN
+                CALL deleteStaff()
+            ELSEIF command == 5 THEN
+                CALL viewSales()
+            ELSEIF command == 6 THEN
+                CALL viewFeedback()
+            ELSEIF command == 7 THEN
+                adminEmail = CALL editOwnProfile(adminEmail)
+            ELSEIF command == 8 THEN
+                CALL os.system to clear the terminal
+                PRINT featuresMessage
+            ELSEIF command == 0 THEN
+                CALL prRed with "Logging out of the system!"
+                BREAK
+            ENDIF
+        EXCEPTION AS e
+            PRINT e
+    ENDDO
+ENDFUNCTION

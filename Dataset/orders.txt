@@ -1,1 +1,1 @@
-customer@gmail.com,Pending,Chicken Kofta:3,
+customer@gmail.com,Finished,Chicken Kofta:3,

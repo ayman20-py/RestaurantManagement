@@ -39,6 +39,7 @@ def checkLogin():
 			# If the user has used all 3 attemps then an error message is sent
 			else:
 				prRed("Too many failed attemps, closing program")
+				response = False
 		else:
 			print("Error, email not found")
 			chances -= 1

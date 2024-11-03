@@ -1,0 +1,159 @@
+IMPORT styles
+
+FUNCTION readCredentials
+    CREATE empty dictionary info
+    OPEN "Dataset/credentials.txt" for reading AS file
+        READ contents of file INTO buffer
+        SPLIT buffer by newline INTO rawData, ignoring blank lines
+        LOOP stringData FROM rawData
+            SPLIT stringData by whitespace INTO data
+            SET currentRole = data[0]
+            SET currentEmail = data[2]
+
+            IF currentRole == "Admin" THEN
+                info[currentEmail] = CREATE dictionary with Admin details
+            END IF
+            
+            IF currentRole == "Manager" THEN
+                info[currentEmail] = CREATE dictionary with Manager details
+            END IF
+            
+            IF currentRole == "Chef" THEN
+                info[currentEmail] = CREATE dictionary with Chef details
+            END IF
+            
+            IF currentRole == "Customer" THEN
+                info[currentEmail] = CREATE dictionary with Customer details
+            END IF
+
+        ENDLOOP
+    RETURN info
+ENDFUNCTION
+
+FUNCTION appendCredentials(data)
+    OPEN "Dataset/credentials.txt" for appending AS file
+        APPEND data to file
+    ENDFUNCTION
+
+FUNCTION writeCredentials(newData)
+    OPEN "Dataset/credentials.txt" for writing AS file
+        CREATE empty list infoList
+        LOOP email FROM newData
+            SET data = newData[email]
+            FORMAT string buffer based on role and details
+            APPEND buffer to infoList
+        ENDLOOP
+
+        JOIN infoList into infoString with newline
+        WRITE infoString to file
+        CALL prGreen to indicate successful modification
+    ENDFUNCTION
+
+FUNCTION readMenu
+    CREATE empty dictionary info
+    OPEN "Dataset/menu.txt" for reading AS file
+        READ contents of file INTO buffer
+        SPLIT buffer by newline INTO rawData, ignoring blank lines
+        LOOP i FROM rawData
+            SPLIT i by comma INTO data
+            SET dishType, dishName, dishPrice, ingredients
+
+            info[dishName] = CREATE dictionary with menu details
+        ENDLOOP
+    RETURN info
+ENDFUNCTION
+
+FUNCTION appendMenu(data)
+    OPEN "Dataset/menu.txt" for appending AS file
+        WRITE data to file
+    ENDFUNCTION
+
+FUNCTION writeMenu(newData)
+    OPEN "Dataset/menu.txt" for writing AS file
+        CREATE empty list infoList
+        LOOP dish FROM newData
+            SET data = newData[dish]
+            FORMAT string line based on dish details
+            APPEND line to infoList
+            PRINT line
+        ENDLOOP
+
+        JOIN infoList into a string and WRITE to file
+        CALL prGreen to indicate successful modification
+    ENDFUNCTION
+
+FUNCTION readOrders
+    CREATE empty dictionary orders
+    SET index = 1
+    OPEN "Dataset/orders.txt" for reading AS file
+        READ contents of file INTO buffer
+        SPLIT buffer by newline INTO rawData, ignoring blank lines
+        LOOP lines FROM rawData
+            SPLIT lines by comma INTO data
+            orders[index] = CREATE dictionary with customer, status, and dishes
+            LOOP dishes FROM data[2:]
+                SPLIT dishes by colon INTO foods
+                IF foods is not empty THEN
+                    APPEND food to orders[index]["Dish"]
+                END IF
+            ENDLOOP
+            INCREMENT index
+        ENDLOOP
+    RETURN orders
+ENDFUNCTION
+
+FUNCTION writeOrders(orders)
+    OPEN "Dataset/orders.txt" for writing AS file
+        LOOP index FROM orders
+            CREATE line with customer, status, and dishes
+            WRITE line to file
+        ENDLOOP
+    ENDFUNCTION
+
+FUNCTION readIngredients
+    CREATE empty dictionary ingredients
+    SET index = 1
+    OPEN "Dataset/ingredients.txt" for reading AS file
+        READ contents of file INTO rawData
+        SPLIT rawData by newline INTO data, ignoring blank lines
+        LOOP rawLine FROM data
+            SPLIT rawLine by comma INTO line
+            ingredients[index] = CREATE dictionary with chef, ingredient, and quantity
+            INCREMENT index
+        ENDLOOP
+    RETURN ingredients
+ENDFUNCTION
+
+FUNCTION writeIngredients(ingredients)
+    OPEN "Dataset/ingredients.txt" for writing AS file
+        LOOP index FROM ingredients
+            SET currentIngredient = ingredients[index]
+            FORMAT line with current ingredient details
+            WRITE line to file
+        ENDLOOP
+    ENDFUNCTION
+
+FUNCTION readSales
+    CREATE empty dictionary sales
+    SET index = 1
+    OPEN "Dataset/salesreport.txt" for reading AS file
+        READ contents of file INTO rawData
+        SPLIT rawData by newline INTO data, ignoring blank lines
+        LOOP rawLine FROM data
+            SPLIT rawLine by comma INTO line
+            sales[index] = CREATE dictionary with chef, month, and amount
+            INCREMENT index
+        ENDLOOP
+    RETURN sales
+ENDFUNCTION
+
+FUNCTION writeSales(sales)
+    OPEN "Dataset/salesreport.txt" for writing AS file
+        LOOP index FROM sales
+            SET currentSale = sales[index]
+            FORMAT line with current sale details
+            WRITE line to file
+        ENDLOOP
+    ENDFUNCTION
+
+PRINT results of readSales()

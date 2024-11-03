@@ -1,0 +1,24 @@
+IMPORT checkLogin FROM login
+IMPORT managerFunctions FROM manager
+IMPORT customerFunctions FROM customer
+IMPORT chef_menu FROM chef
+IMPORT adminFunctions FROM admin_2
+IMPORT styles
+
+SET loginStatus = checkLogin()
+
+IF loginStatus["response"] THEN
+    IF loginStatus["role"] == "Admin" THEN
+        CALL adminFunctions(loginStatus["email"])
+    ELSE IF loginStatus["role"] == "Manager" THEN
+        CALL managerFunctions(loginStatus["email"])
+    ELSE IF loginStatus["role"] == "Chef" THEN
+        CALL chef_menu(loginStatus["email"])
+    ELSE IF loginStatus["role"] == "Customer" THEN
+        CALL customerFunctions(loginStatus["email"])
+    ELSE
+        PRINT "Work in progress"
+    ENDIF
+ELSE
+    CALL prRed to indicate "Error"
+ENDIF

@@ -1,0 +1,51 @@
+IMPORT readCredentials FROM datasetManipulation
+IMPORT styles
+IMPORT os
+
+FUNCTION checkLogin
+    SET credentials = readCredentials()  
+    CALL os.system to clear the terminal
+
+    PRINT "Welcome to the restaurant!!"
+    PRINT "Please login to the system"
+
+    SET chances = 3
+    SET response = False
+
+    DOWHILE chances > 0
+        SET emailInput = INPUT "Please enter your email: "
+
+        IF emailInput IN credentials THEN
+            SET response = True
+            SET currentRole = credentials[emailInput]["Role"]
+            SET nickname = credentials[emailInput]["Nickname"]
+            SET count = 1
+
+            DOWHILE count <= 3
+                SET passwInput = INPUT "Please enter your password: "
+                IF passwInput == credentials[emailInput]["Password"] THEN
+                    CALL os.system to clear the terminal
+                    PRINT ""
+                    CALL prGreen to indicate "Login Successful!"
+                    CALL prLightPurple to display currentRole
+                    PRINT "Hi " + nickname + "!"
+                    BREAK  // Exit the loop on successful password entry
+                END IF
+
+                PRINT "Incorrect password!"
+                INCREMENT count
+            ENDDO
+
+            IF count > 3 THEN
+                CALL prRed to indicate "Too many failed attempts, closing program"
+                SET response = False
+            END IF
+        ELSE
+            PRINT "Error, email not found"
+            DECREMENT chances
+            RETURN {"email": emailInput, "response": response, "role": "None"}
+        ENDIF
+
+        RETURN {"email": emailInput, "response": response, "role": currentRole}
+    ENDDO
+END FUNCTION

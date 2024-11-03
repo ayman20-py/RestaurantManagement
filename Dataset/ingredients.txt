@@ -1,3 +1,3 @@
-Thomas,Chicken,20KG
-Thomas,Oats,10Kg
+Vincent,Cooking Oil,20L
 Chris,Massala,2KG
+Vincent,Flour,10KG

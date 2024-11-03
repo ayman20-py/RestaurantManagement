@@ -87,8 +87,6 @@ def writeMenu(newData):
 			line = f"{data["Type"]}, {dish}, {data["Price"]}, {", ".join(data["Ingredients"])}"
 			infoList.append(line)
 			
-			print(line)
-		
 
 		file.write("\n".join(infoList))
 
@@ -114,7 +112,6 @@ def readOrders():
     return orders
 
 
-# customer@gmail.com,Pending,Chicken Achari:2,Fatimah Butter:3
 def writeOrders(orders):
 	with open("Dataset/orders.txt", "w") as file:
 		for index in orders:
@@ -165,3 +162,5 @@ def writeSales(sales):
 			currentSale = sales[index]
 			line = f"{currentSale["Chef"]},{currentSale["Month"]},{currentSale["Amount"]}"
 			file.write(f"{line}\n")
+
+print(readSales())

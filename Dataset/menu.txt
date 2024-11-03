@@ -4,10 +4,10 @@ Flat Breads, Cheese Naan, 2.5,  Flour, Cheese, Milk, Salt
 Flat Breads, Chapati, 3, Flour, Olive Oil, Water, Salt
 Rice, Plain Rice, 2.50, 
 Rice, Biryani Rice, 5.00, 
-Curry, Fatimah Butter, 12, Chicken, Heavy Cream, Curry powder, tomatoes, Chili 
-Beverage, Coca Cola, 2.50
-Beverage, Teh Tarik, 3.20
-Beverage, Sprite, 2.50
-Beverage, Fanta, 2.50
-Beverage, Fanta Grape, 2.50
-Beverage, Chai, 3.00
+Beverage, Coca Cola, 2.50, 
+Beverage, Teh Tarik, 3.20, 
+Beverage, Sprite, 2.50, 
+Beverage, Fanta, 2.50, 
+Beverage, Fanta Grape, 2.50, 
+Beverage, Chai, 3.00, 
+Curry, Beef Curry, 19, Beef, Curry powder, onion, garlic
